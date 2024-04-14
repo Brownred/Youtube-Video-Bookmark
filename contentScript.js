@@ -1,11 +1,11 @@
 
 (() => {
     let youtubeLeftControls, youtubePlayer;
-    let currentVideoId = "";
+    let currentVideo = "";
     let currentVideoBookmarks = []; // Stores all current video bookmarks in an array
 
     // we are gonna add a listenner that will listen to messages from the background script
-    chrome.runtime.onmessage.addListener((message, sender, sendResponse) => {
+    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         // prameters are message, sender, sendResponse
         // message is the message that was sent from the background script
         // sender is the sender of the message
@@ -14,7 +14,7 @@
         const { type, value, videoId } = message; // we are destructuring the message object to get the type and value
 
         if (type === "NEW") {
-            currentVideoId = videoId;
+            currentVideo = videoId;
 
             // call a function to handle any video actions with new video.
             newvideoLoaded ();
@@ -29,7 +29,7 @@
         if (!bookmarkBtnExists) {
             const bookmarkBtn = document.createElement("img");
 
-            bookmarkBtn.src = chrome.runtime.getURL("images/bookmark.png");
+            bookmarkBtn.src = chrome.runtime.getURL("assets/bookmark.png");
             bookmarkBtn.className = "ytp-button " + "bookmark-btn";
             bookmarkBtn.title = "Click to bookmark this timestamp";
 
@@ -60,10 +60,10 @@
                     desc: `Bookmark at ${getTime(currentTime)}`
                 };
 
-                console.log(newBookmark);
+                console.log(newBookmark); // This doesnt output the right time format returns : {time: 1858.790574, desc: 'Bookmark at 01T'}
                 // sync it to chrome storage. Each video will map back to a set of bookmark in storage
                 chrome.storage.sync.set({
-                    [currentVideoId]: JSON.stringify([...currentVideoBookmarks, newBookmark].sort((a, b) => a.time - b.time)) // Things need to be stored in JSON in chrome storage
+                    [currentVideo]: JSON.stringify([...currentVideoBookmarks, newBookmark].sort((a, b) => a.time - b.time)) // Things need to be stored in JSON in chrome storage
                 })
             });
 

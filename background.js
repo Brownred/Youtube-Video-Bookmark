@@ -6,20 +6,20 @@
 
 chrome.tabs.onUpdated.addListener((tabId, tab) => {
   if (tab.url && tab.url.includes("youtube.com/watch")) {
-    const queryParameters = tab.url.split("?")[1] // Will be our unique video value since every video has a unique value here
+    const queryParameters = tab.url.split("?")[1]; // Will be our unique video value since every video has a unique value here
     
     
-    const urlParameters = new URLSearchParams(queryParameters)   // 
+    const urlParameters = new URLSearchParams(queryParameters);   // 
 
     // theres a messaging system that happens between the extension, and were gonna send a message to the content script that bassicly says a new video has loaded. And this is the video ID of that video. 
     // And the content script will then send a message back to the background script with the title of the video. And then the background script will store that in local storage.
     
     chrome.tabs.sendMessage(tabId, {
       type: "NEW",
-      videoId: urlParameters.get("v")
+      videoId: urlParameters.get("v"),
       // random: "random" this is just to show that we can send multiple values and is accesible in the contentScript
     });
     
-    chrome.pageAction.show(tabId)
+    // chrome.pageAction.show(tabId);
   }
 });

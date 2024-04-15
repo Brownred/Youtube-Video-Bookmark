@@ -4,6 +4,7 @@
     let currentVideo = "";
     let currentVideoBookmarks = []; // Stores all current video bookmarks in an array
 
+
     // we are gonna add a listenner that will listen to messages from the background script
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         // prameters are message, sender, sendResponse
@@ -17,13 +18,27 @@
             currentVideo = videoId;
 
             // call a function to handle any video actions with new video.
-            newvideoLoaded ();
+            newVideoLoaded ();
         }
     });
 
-    const newvideoLoaded = () => {
+    // Fetch all the current video bookmarks from chrome storage
+    // we are gonna grab all bookmarks form chrome storage
+    // write a promise that resolves once we retrieve all  bookmarks
+    const fetchBookmarks = () => {
+        return new Promise((resolve) => {
+            chrome.storage.sync.get([currentVideo], (result) => {
+                resolve(result [currentVideo] ? JSON.parse(result[currentVideo]) : []);
+            });
+        }
+)};
+
+
+    const newVideoLoaded = async () => {
         // check if a bookmark button already exists within the youtube website DOM
         const bookmarkBtnExists = document.getElementsByClassName("bookmark-btn").length[0];
+        currentVideoBookmarks = await fetchBookmarks();
+
         console.log("bookmarkBtnExists", bookmarkBtnExists);
         // It doesnt so we add one
         if (!bookmarkBtnExists) {
@@ -45,7 +60,7 @@
             // get the current video timestamp will give us in seconds
             // convert the seconds to a standard time of how it is displayed in youtube
 
-            bookmarkBtn.addEventListener("click", () => {
+            bookmarkBtn.addEventListener("click", async () => {
                 // get the current video time
                 const currentTime = youtubePlayer.currentTime;
                 const getTime = (t) => {
@@ -62,6 +77,9 @@
 
                 console.log(newBookmark); // This doesnt output the right time format returns : {time: 1858.790574, desc: 'Bookmark at 01T'}
                 // sync it to chrome storage. Each video will map back to a set of bookmark in storage
+
+                currentVideoBookmarks = await fetchBookmarks();
+
                 chrome.storage.sync.set({
                     [currentVideo]: JSON.stringify([...currentVideoBookmarks, newBookmark].sort((a, b) => a.time - b.time)) // Things need to be stored in JSON in chrome storage
                 })
@@ -70,6 +88,6 @@
         }
     }
 
-    newvideoLoaded();
+    newVideoLoaded();
 })();
 
